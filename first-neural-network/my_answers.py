@@ -72,25 +72,23 @@ class NeuralNetwork(object):
             delta_weights_h_o: change in weights from hidden to output layers
 
         '''
-        #### Implement the backward pass here ####
         ### Backward pass ###
-
-        # TODO: Output error - Replace this value with your calculations.
-        error = final_outputs - y # Output layer error is the difference between desired target and actual output.
-        
-        # TODO: Calculate the hidden layer's contribution to the error
-        # hidden_error = np.dot(output_error_term)
-        
-        # TODO: Backpropagated error terms - Replace these values with your calculations.
+        # Output error - Replace this value with your calculations.
+        error = final_outputs - y # Output layer error is the difference between desired target and actual output.     
         output_error_term = error
-        # print(output_error_term.shape)
         
-        hidden_error_term = np.dot(output_error_term, self.weights_hidden_to_output.T) *(1-hidden_outputs)*hidden_outputs
+        # Calculate the hidden layer's contribution to the error
+        hidden_error = output_error_term * self.weights_hidden_to_output
         
+        hidden_outputs = hidden_outputs[:,None]
+        hidden_error_term = hidden_error * ((1-hidden_outputs)*hidden_outputs)
+
         # Weight step (input to hidden)
-        delta_weights_i_h += X[:,None] * hidden_error_term
+        delta_weights_i_h += X[:,None] * hidden_error_term.T # outer product of input and output
+        # print(delta_weights_i_h.shape) check the dimension
+        
         # Weight step (hidden to output)
-        delta_weights_h_o += output_error_term * hidden_outputs[:,None]
+        delta_weights_h_o += hidden_outputs * output_error_term.T
         
         return delta_weights_i_h, delta_weights_h_o
 
@@ -115,7 +113,6 @@ class NeuralNetwork(object):
             features: 1D array of feature values
         '''
         
-        #### Implement the forward pass here ####
         # n_records = features.shape[0]
         hidden_inputs = np.dot(features,self.weights_input_to_hidden) # signals into hidden layer
         hidden_outputs = self.activation_function(hidden_inputs) # signals from hidden layer
@@ -127,9 +124,9 @@ class NeuralNetwork(object):
 
 
 #########################################################
-# Set your hyperparameters here
-##########################################################
-iterations = 100
+# Set hyperparameters here
+#########################################################
+iterations = 1000
 learning_rate = 0.1
-hidden_nodes = 2
+hidden_nodes = 55
 output_nodes = 1
